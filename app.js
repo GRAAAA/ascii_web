@@ -1,4 +1,3 @@
-// app.js — auto-fit to panel (no cropping), PNG/JPEG export, re-upload friendly
 (function () {
   const $ = (id) => document.getElementById(id);
 
@@ -26,9 +25,9 @@
 
   let imgBitmap = null;
   let lastAsciiPlain = "";
-  let lastCells = null; // [{ch, r,g,b}] row-major
+  let lastCells = null;
   let lastCols = 0, lastRows = 0;
-  let baseCharAspect = 0.5; // (charWidth / lineHeight), measured at runtime
+  let baseCharAspect = 0.5;
 
   const PRESETS = {
     complex:
@@ -38,7 +37,7 @@
     dots: "@o+=-:. ",
   };
 
-  // Measure actual monospace metrics from the .ascii style
+
   function measureCharAspect() {
     const probe = document.createElement("pre");
     probe.className = "ascii";
@@ -60,7 +59,6 @@
   }
   baseCharAspect = measureCharAspect();
 
-  // Presets
   function setPreset(name) {
     charsetInput.value = PRESETS[name] || PRESETS.classic;
     render();
@@ -71,7 +69,6 @@
 
   widthRange.addEventListener("input", () => (widthVal.textContent = widthRange.value));
 
-  // Drag & drop
   ["dragenter", "dragover"].forEach((ev) =>
     drop.addEventListener(ev, (e) => {
       e.preventDefault();
@@ -95,7 +92,6 @@
     if (f) loadFile(f);
   });
 
-  // Re-upload friendly: NEVER lock; replace current bitmap and re-render
   async function loadFile(file) {
     const url = URL.createObjectURL(file);
     try {
@@ -108,7 +104,7 @@
         `<strong>Loaded:</strong> <span class="hint">${escapeHtml(file.name)}</span>
          <p class="hint">Drop/Choose again to replace image.</p>
          <label for="file" class="btn" id="chooseBtn2">Choose another…</label>`;
-      // keep replacement working even after we replaced innerHTML
+
       const chooseBtn2 = document.getElementById("chooseBtn2");
       chooseBtn2 && chooseBtn2.addEventListener("click", () => fileInput.click());
     } catch (err) {
@@ -120,7 +116,6 @@
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-  // Compute rows from source aspect * measured character aspect so ratio is correct.
   function getScaledContext() {
     if (!imgBitmap) return null;
 
@@ -131,7 +126,6 @@
 
     const rows = Math.max(1, Math.round(cols * srcAspect * (baseCharAspect * aspectMultiplier)));
 
-    // Work at 1 pixel per output character
     const canvasW = cols;
     const canvasH = rows;
 
@@ -214,28 +208,26 @@
       lastAsciiPlain = outText;
       lastCells = cells; lastCols = cols; lastRows = rows;
 
-      // Fit to viewport so it NEVER crops
       fitAsciiToPanel(cols, rows);
       rerender.disabled = false;
     });
   }
 
-  // Fit: scale font-size/line-height so rows & cols fit panel width/height
   function fitAsciiToPanel(cols, rows) {
-    const panel = asciiPre.parentElement;    // .out
-    const bar = panel.querySelector(".bar"); // sticky header
+    const panel = asciiPre.parentElement;
+    const bar = panel.querySelector(".bar");
     const barH = bar.getBoundingClientRect().height;
     const rect = panel.getBoundingClientRect();
-    const availW = rect.width - 36;        // minus pre padding
+    const availW = rect.width - 36;
     const availH = rect.height - barH - 36;
 
-    let lineH = 16;                         // px
+    let lineH = 16;
     let charW = baseCharAspect * lineH;
 
     const needW = cols * charW;
     const needH = rows * lineH;
     const s = Math.min(availW / needW, availH / needH, 1);
-    lineH = Math.max(6, Math.floor(lineH * s)); // min legible
+    lineH = Math.max(6, Math.floor(lineH * s));
     charW = baseCharAspect * lineH;
 
     asciiPre.style.setProperty("--ascii-line-height", `${lineH}px`);
@@ -248,7 +240,6 @@
     })[m]);
   }
 
-  // Re-render on changes
   let t = null;
   const bump = () => { clearTimeout(t); t = setTimeout(render, 80); };
   [widthRange, scaleY, charsetInput, invert, colorize, edgeBoost].forEach((n) =>
@@ -256,10 +247,8 @@
   );
   rerender.addEventListener("click", render);
 
-  // Resize = re-fit (no re-sampling needed)
   window.addEventListener("resize", () => { if (lastCols && lastRows) fitAsciiToPanel(lastCols, lastRows); });
 
-  // Clipboard + text/html export
   copyBtn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(lastAsciiPlain || asciiPre.innerText || "");
@@ -281,7 +270,6 @@
     download("ascii-art.html","text/html;charset=utf-8", html);
   });
 
-  // Export as PNG/JPEG — render ASCII glyphs to a canvas using current fit
   function exportImage(mime = "image/png", scale = 2) {
     if (!lastCells || !lastCols || !lastRows) return;
     const lh = parseFloat(getComputedStyle(asciiPre).getPropertyValue("--ascii-line-height")) || 10;
@@ -320,7 +308,6 @@
   savePng && savePng.addEventListener("click", () => exportImage("image/png", 2));
   saveJpg && saveJpg.addEventListener("click", () => exportImage("image/jpeg", 2));
 
-  // Clear current image & output (keeps settings)
   clearBtn.addEventListener("click", () => {
     imgBitmap = null;
     asciiPre.textContent = "";
@@ -328,13 +315,13 @@
     lastCells = null; lastCols = lastRows = 0;
     info.textContent = "Cleared. Drop or choose an image to begin.";
     rerender.disabled = true;
-    // restore drop content
+
     drop.innerHTML =
       '<strong>Drop image here</strong><p>or</p>' +
       '<label for="file" class="btn" id="chooseBtn">Choose image…</label>' +
       '<input id="file" type="file" accept="image/*" hidden />' +
       '<p class="hint">PNG • JPG • WebP • GIF (first frame)</p>';
-    // re-bind new input + button inside drop
+
     const newFile = drop.querySelector("#file");
     const newBtn = drop.querySelector("#chooseBtn");
     newBtn.addEventListener("click", () => newFile.click());
@@ -362,7 +349,6 @@
     setTimeout(() => n.remove(), 1600);
   }
 
-  // Init
   widthVal.textContent = widthRange.value;
   info.textContent = "Drop or choose an image to begin.";
 })();
