@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Image → ASCII Art</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Image to ASCII Art</h1>
+
+    <div class="panel grid">
+      <!-- Left: Controls -->
+      <section class="controls" id="controls">
+        <div class="row">
+          <div class="drop" id="drop">
+            <strong>Drop image here</strong>
+            <p>or</p>
+            <label for="file" class="btn" id="chooseBtn">Choose image…</label>
+            <input id="file" type="file" accept="image/*" hidden />
+            <p class="hint">PNG • JPG • WebP • GIF (first frame)</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="width">Output width (characters)</label>
+          <input id="width" type="range" min="40" max="400" value="160" />
+          <div class="hint"><span class="token"><span id="widthVal">160</span> cols</span> • Higher = more detail</div>
+        </div>
+
+        <div class="row">
+          <label for="scaleY">Character cell height (px per row)</label>
+          <input id="scaleY" type="range" min="8" max="24" value="12" />
+          <div class="hint">Tune to match your monospace font aspect.</div>
+        </div>
+
+        <div class="row">
+          <label for="charset">Character set (dark → light)</label>
+          <input id="charset" type="text" value="@#%*+=-:. " />
+          <div class="row h presets">
+            <button class="btn ghost" data-preset="classic">Classic</button>
+            <button class="btn ghost" data-preset="complex">Complex</button>
+            <button class="btn ghost" data-preset="blocks">Blocks</button>
+            <button class="btn ghost" data-preset="dots">Dots</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Rendering</label>
+          <div class="checkbox"><input id="invert" type="checkbox" /> <span>Invert brightness</span></div>
+          <div class="checkbox"><input id="colorize" type="checkbox" checked /> <span>Colorize characters</span></div>
+          <div class="checkbox"><input id="edgeBoost" type="checkbox" /> <span>Edge boost (sharper)</span></div>
+        </div>
+
+        <div class="row h">
+          <button id="copyBtn" class="btn">Copy ASCII</button>
+          <button id="saveTxt" class="btn">Save .txt</button>
+          <button id="saveHtml" class="btn">Save .html</button>
+          <button id="savePng" class="btn">Save .png</button>
+          <button id="saveJpg" class="btn">Save .jpg</button>
+        </div>
+
+        <div class="row h">
+          <button id="clearBtn" class="btn ghost">Clear</button>
+          <button id="rerender" class="btn primary" disabled>Render ASCII</button>
+        </div>
+
+        <div class="row">
+          <small class="hint">code is on my github gang :D</small>
+        </div>
+      </section>
+
+      <!-- Right: Output -->
+      <section class="out">
+        <div class="bar">
+          <div class="hint" id="info">Drop or choose an image to begin.</div>
+        </div>
+        <div id="ascii" class="ascii"></div>
+      </section>
+    </div>
+
+    <p class="footer">Built with ❤ — works offline. Drag an image, tweak settings, and export.
+      <span class="token">v1.2</span>
+    </p>
+  </div>
+
+  <!-- Hidden canvases for processing -->
+  <canvas id="canvas" style="display:none"></canvas>
+  <canvas id="work" style="display:none"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
